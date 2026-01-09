@@ -1,16 +1,32 @@
-#include "ScriptCommand.h"
+#include "script-launcher.h"
 
-ScriptCommand::ScriptCommand()
+ScriptLauncher::ScriptLauncher()
 {
-    Initialize();
+    // Initialize();
 }
 
-ScriptCommand::~ScriptCommand()
+ScriptLauncher::~ScriptLauncher()
 {
 
 }
 
-void ScriptCommand::Initialize()
+void ScriptLauncher::ParseCommands()
+{
+    /* main commands to identify:
+        list <-- maybe 'show' is better? (alias it)
+            list software/programs/users/etc
+        uninstall <-- make this universal too?
+        install <-- make this universal? (ie MS office installs/app installs/bginfo etc)
+        backup <-- add options for configuration of the backup
+        restore <-- this seriously needs work, make it such that backups can be chosen (listed from U drive)
+
+    */
+   // take input
+    string UserInput = "";
+    cin >> UserInput;
+}
+
+void ScriptLauncher::Initialize()
 {
     // Do other initialize stuff here if needed in the future
  
@@ -25,7 +41,7 @@ void ScriptCommand::Initialize()
 *  - Menu options + their descriptions
 *  - etc?
 */
-void ScriptCommand::RenderMenu()
+void ScriptLauncher::RenderMenu()
 {
     string user_input = "";
     while (MenuActive)
@@ -44,7 +60,7 @@ void ScriptCommand::RenderMenu()
     }
 }
 
-void ScriptCommand::RenderSoftwareMenu()
+void ScriptLauncher::RenderSoftwareMenu()
 {
     string user_input = "";
     bool CurrentMenuActive = true;
@@ -72,7 +88,7 @@ void ScriptCommand::RenderSoftwareMenu()
     }
 }
 
-void ScriptCommand::RenderDataBackupMenu()
+void ScriptLauncher::RenderDataBackupMenu()
 {
     string user_input = "";
     bool CurrentMenuActive = true;
@@ -100,12 +116,12 @@ void ScriptCommand::RenderDataBackupMenu()
     }
 }
 
-void ScriptCommand::ListInstalledApps()
+void ScriptLauncher::ListInstalledApps()
 {
     system("powershell Select-Object DisplayName, PackageName | powershell Get-AppxProvisionedPackage -Online >> C:\\applist.txt && explorer C:\\applist.txt");
 }
 
-void ScriptCommand::ParseMenuInput(string Input)
+void ScriptLauncher::ParseMenuInput(string Input)
 {
     int Selection = SanitizeInput(Input);
     if (Selection == Menu.SoftwareMenu)
@@ -120,7 +136,7 @@ void ScriptCommand::ParseMenuInput(string Input)
     }
 }
 
-int ScriptCommand::SanitizeInput(string Input)
+int ScriptLauncher::SanitizeInput(string Input)
 {
     if (Input == "") return -1;
     if (Input == "exit") exit(0);
@@ -131,7 +147,7 @@ int ScriptCommand::SanitizeInput(string Input)
     return stoi(Input);
 }
 
-void ScriptCommand::ParseInput(string Input)
+void ScriptLauncher::ParseInput(string Input)
 {
     if (Input == "list")
     {
@@ -178,7 +194,7 @@ void ScriptCommand::ParseInput(string Input)
     }
 }
 
-void ScriptCommand::ClearScreen()
+void ScriptLauncher::ClearScreen()
 {
     for (int i = 0; i < 100; i++)
     {
@@ -186,7 +202,7 @@ void ScriptCommand::ClearScreen()
     }
 }
 
-void ScriptCommand::UninstallOutlookNew()
+void ScriptLauncher::UninstallOutlookNew()
 {
     string cmd = "powershell Remove-AppxPackage -AllUsers $(Get-AppxPackage -AllUsers -Name Microsoft.OutlookForWindows)";
     cout << "Uninstalling Outlook(new) MS app..." << endl;
@@ -195,7 +211,7 @@ void ScriptCommand::UninstallOutlookNew()
     CommandReturn = "Done! Uninstalled Outlook(new)";
 }
 
-void ScriptCommand::UninstallMSAppScript()
+void ScriptLauncher::UninstallMSAppScript()
 {
     string AppName = "";
     string UninstallMSAppScriptCommand = "";
@@ -226,35 +242,35 @@ void ScriptCommand::UninstallMSAppScript()
     }
 }
 
-void ScriptCommand::InstallMSAppScript()
+void ScriptLauncher::InstallMSAppScript()
 {
 
 }
 
-void ScriptCommand::DefaultUninstallApps()
+void ScriptLauncher::DefaultUninstallApps()
 {
     string Apps = "Microsoft.OutlookForWindows Microsoft.Xbox.TCUI Microsoft.XboxGamingOverlap Microsoft.XboxIdentityProvider Microsoft.XboxSpeechToTextOverlay Microsoft.ZuneMusic";
 }
 
-void ScriptCommand::BackupScript()
+void ScriptLauncher::BackupScript()
 {
     CommandReturn = "PC backup complete";
     system("powershell ./scripts/backup.ps1");
 }
 
-void ScriptCommand::RestoreScript()
+void ScriptLauncher::RestoreScript()
 {
     CommandReturn = "PC restore complete";
     system("powershell ./scripts/restore.ps1");
 }
 
-void ScriptCommand::BgInfoInstallScript()
+void ScriptLauncher::BgInfoInstallScript()
 {
     CommandReturn = "BgInfo has been installed";
     system("powershell ./scripts/install-bginfo.ps1");
 }
 
-void ScriptCommand::SetExecutionPolicy(int PolicyValue)
+void ScriptLauncher::SetExecutionPolicy(int PolicyValue)
 {
     if (PolicyValue == Policy.RemoteSigned)
     {

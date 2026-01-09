@@ -1,8 +1,7 @@
-#include "ScriptCommand.h"
+#include "script-launcher.h"
 
 int main()
 {
-    ScriptCommand scmd;
-
-    // scmd.UninstallMSAppScript("Microsoft.BingNews");
+    ScriptLauncher launcher;
+    launcher.ParseCommands();
 }

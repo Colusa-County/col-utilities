@@ -37,18 +37,24 @@ public:
     const int BackupRestoreMenu = 2;
 };
 
-class ScriptCommand {
+class ScriptLauncher {
 
     public:
-        ScriptCommand();
-        ~ScriptCommand();
+        ScriptLauncher();
+        ~ScriptLauncher();
+
         void RenderMenu();
         void RenderSoftwareMenu();
         void RenderDataBackupMenu();
+
         void ClearScreen();
+
         void Initialize();
+
         void ParseInput(string Input);
+        
         void ParseMenuInput(string Input);
+
         void UninstallMSAppScript();
         void InstallMSAppScript();
         void BackupScript();
@@ -58,6 +64,8 @@ class ScriptCommand {
         void UninstallOutlookNew();
         void SetExecutionPolicy(int Policy);
         void ListInstalledApps();
+
+        void ParseCommands();
 
     private:
         string CommandReturn;

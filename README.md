@@ -6,6 +6,8 @@ A series of scripts and programs to provide different utilities to the IT team
 
  - data-backup-script
     This folder contains scripts for data backup and restore to mapped user network drives
+    - backup: backs up all local data to the user drive of the currently logged in user. Creates a folder on their drive named "PC Backup" with todays date appended at the end.
+    - restore: this script needs serious work as it only works for a backup that happened on the same day. It looks for a folder matching the name of "PC Backup" with todays date appended to the end. If no such folder exists (ie you ran the backup yesterday and today is not yesterday) then the restore will fail. NEEDS WORK!
  
  - install-bginfo
     A very simple script to "install" bginfo on to a computer system. All it does is copy files from the given network path and pastes them into the proper locations locally on a machine.

@@ -2,11 +2,22 @@
 clear
 cls
 
+$sleeping = $false
 echo "PWNING UNLOCKED PC ..."
-sleep 1.5
+
+if ($sleeping)
+{ 
+  sleep 1.5
+}
+
 echo ""
 echo "CREATING OUTLOOK APPLICATION OBJECT ..."
-sleep 1.5
+
+if ($sleeping)
+{
+  sleep 1.5
+}
+
 $outlook = New-Object -ComObject Outlook.Application
 $namespace = $outlook.GetNamespace("MAPI")
 
@@ -22,23 +33,34 @@ $mail = $outlook.CreateItem(0)
 
 $userEmail = $namespace.CurrentUser.AddressEntry.GetExchangeUser().PrimarySmtpAddress
 
-$recipient = $mail.Recipients.Add("itdept@countyofcolusaca.gov")
+$recipient = $mail.Recipients.Add("hgraves@countyofcolusaca.gov")
+$mail.Recipients.Add($userEmail)
 $recipient.Type = 1
 
-$mail.Subject = "I got PwNt! I left my PC unlocked and unattended!"
-$mail.Body = "Sorry about that! I'll do better so I don't get PWNED again.`n`n`nThis message was composed by the email-pwn script `nTiming of pwn: $(Get-Date)"
+
+$mail.Subject = "[EMAIL-PWN] I left my PC unlocked and unattended!"
+$mail.Body = "Hi there!`n`nSorry about that! I'll do better so I don't get PWNED again.
+        `n`nThis message was composed by the email-pwn script 
+        User: $env:USERNAME
+        Machine: $env:COMPUTERNAME
+        Time: $(Get-Date)"
 
 sleep 1.5
 
 echo $mail
 echo ""
 echo "PWN EMAIL OBJECT CREATED!"
+sleep 1
 
 $mail.Display($false)
-# $mail.send()
+$mail.send()
 
 echo "PWN MAIL SENT!"
-echo $userEmail "you got OWNED"
+echo ""
+sleep 1
+echo "$userEmail, you got OWNED"
+echo ""
+sleep 1.5
 echo "EXITING ..."
 sleep 1
 echo ""

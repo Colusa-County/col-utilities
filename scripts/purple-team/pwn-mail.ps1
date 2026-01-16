@@ -1,7 +1,25 @@
+# Pwn-Mail.ps1
+#
+# Description: This script creates and sends a "pwn" email via Outlook when executed on an unlocked PC.
+# It is intended for use in purple team exercises to demonstrate the risks of leaving workstations unattended.
+#
+# Author: Colusa County IT Purple Team | Henry Graves
+# Version: 1.0
+# 
+# Date: 2024-06-10
+#
+# Usage: Run this script on an unlocked Windows machine with Outlook installed.
+# Note: Ensure you have permission to run this script in your environment.
+# Disclaimer: Use this script responsibly and ethically. Unauthorized use may violate policies or laws.
+#-----------------------------------------------------------------------------------------------
+
+# Set to $true to enable delays for demonstration purposes
+$sleeping = $false
+
+# Function to create and send the pwn email
 function PwnMail() {
     Clear-Host
 
-    $sleeping = $false
     Write-Host "PWNING UNLOCKED PC ..."
 
     if ($sleeping) { Start-Sleep 1.5 }
@@ -24,23 +42,21 @@ function PwnMail() {
     Write-Host ""
     Write-Host "COMPOSING PWN EMAIL OBJECT ..."
 
+    # Build mail item
     $mail = $outlook.CreateItem(0)
-
     $userEmail = $namespace.CurrentUser.AddressEntry.GetExchangeUser().PrimarySmtpAddress
-
     $recipient = $mail.Recipients.Add("hgraves@countyofcolusaca.gov")
     $mail.Recipients.Add($userEmail)
     $recipient.Type = 1
 
+    # Build GIF attachment
     $gifPath = "https://media1.tenor.com/m/kiv30bAOYtEAAAAd/gandalf-yes.gif"
     $cid = "gandalf.gif"
-
     $attachment = $mail.Attachments.Add($gifPath, 1, 0, "Woopsies!")
     $attachment.PropertyAccessor.SetProperty("http://schemas.microsoft.com/mapi/proptag/0x3712001F", $cid)
     $attachment.PropertyAccessor.SetProperty("http://schemas.microsoft.com/mapi/proptag/0x7D00000B", $true)
 
-
-
+    # Compose mail body and subject
     $mail.Subject = "[PWN-MAIL] I left my PC unlocked and unattended!"
     $mail.HTMLBody = @"
 <html>
@@ -49,7 +65,7 @@ Hi there!<br><br>Sorry about that! I'll do better so I don't get PWNED again. <b
 I'll read this article now:<br>
 https://axionetworks.com/knowledge/cybersecurity-compliance/endpoint-security/why-you-should-always-lock-your-computer-when-you-step-away/
 <br><br><br>
-A message from the Purple Team:<br><br>
+A message from the Colusa County IT Purple Team:<br><br>
 <i><b>Be more careful next time!<br>
 <p><img src="cid:$cid" alt="Gandalf Yes" style="max-width: 400px;"/></p><br>
 Your Friendly Neighborhood Purple Teamer,<br>
@@ -97,6 +113,7 @@ Details of the PWNED PC:<br></b>
     Write-Host ""
     Write-Host ""
 
+    # Clean up COM objects
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($mail) | Out-Null
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($outlook) | Out-Null
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($namespace) | Out-Null
@@ -104,9 +121,11 @@ Details of the PWNED PC:<br></b>
     Exit-PSHostProcess
 }
 
+# Main function to start script execution
 function Main()
 {
     PwnMail
 }
 
+## Start script execution
 Main

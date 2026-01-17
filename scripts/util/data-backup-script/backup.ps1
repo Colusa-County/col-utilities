@@ -1,4 +1,3 @@
-
 # @name         Backup Script
 # @author       Henry Graves
 # @date         6/23/2025
@@ -56,8 +55,8 @@ function Create-Backup {
                 New-Item -ItemType Directory -Path $DestDir -Force | Out-Null
             }
 
-            Copy-Item -Path $File.FullName -Destination $DestPath -Force -ErrorAction Stop
-
+            # Copy-Item -Path $File.FullName -Destination $DestPath -Force -ErrorAction Stop
+            Robocopy.exe $File.DirectoryName $DestDir $File.Name /COPYALL /R:3 /W:5 | Out-Null
         }
 
         Write-Host "Backup of $Source completed successfully."

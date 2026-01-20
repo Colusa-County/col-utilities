@@ -16,6 +16,8 @@
 # Set to $true to enable delays for demonstration purposes
 $sleeping = $false
 
+$testing = $false
+
 # Function to create and send the pwn email
 function PwnMail() {
     Clear-Host
@@ -45,7 +47,7 @@ function PwnMail() {
     # Build mail item
     $mail = $outlook.CreateItem(0)
     $userEmail = $namespace.CurrentUser.AddressEntry.GetExchangeUser().PrimarySmtpAddress
-    $recipient = $mail.Recipients.Add("hgraves@countyofcolusaca.gov")
+    $recipient = $mail.Recipients.Add("itdept@countyofcolusaca.gov")
     $mail.Recipients.Add($userEmail)
     $recipient.Type = 1
 
@@ -57,7 +59,11 @@ function PwnMail() {
     $attachment.PropertyAccessor.SetProperty("http://schemas.microsoft.com/mapi/proptag/0x7D00000B", $true)
 
     # Compose mail body and subject
-    $mail.Subject = "[PWN-MAIL] I left my PC unlocked and unattended!"
+    if ($testing) {
+        $mail.Subject = "[THIS IS A TEST] [PWN-MAIL] I left my PC unlocked and unattended!"
+    } else {
+        $mail.Subject = "[PWN-MAIL] I left my PC unlocked and unattended!"
+    }
     $mail.HTMLBody = @"
 <html>
 <body>

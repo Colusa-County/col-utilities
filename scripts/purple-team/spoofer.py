@@ -3,6 +3,8 @@
 import smtplib
 from email.mime.text import MIMEText
 
+args = []
+
 msg = MIMEText("This is a test email sent from the spoofer script.")
 
 subject_input = input("Subject: ")
@@ -16,10 +18,10 @@ msg['To'] = to_input
 
 port_input = input("Port: ")
 email_server_input = input("Email server: ")
-smpt = smtplib.SMTP(email_server_input, int(port_input))
+smtp = smtplib.SMTP(email_server_input, int(port_input))
 
 input("Press enter to send email...")
-send_ = smpt.send_message(msg)
+send_ = smtp.send_message(msg)
 print("Email sent!")
-smpt.quit()
+smtp.quit()
 exit()

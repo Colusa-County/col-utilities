@@ -1,3 +1,23 @@
+##
+# @name         Spoofer Script
+# @version:     1.0
+# @date:        2024-06-01
+# @file:        spoofer.py
+# @author:      Colusa County IT Purple Team // Henry Graves
+# @description: This script is designed to send spoofed emails for testing purposes. 
+#               It can read email details from a configuration file or prompt the user for input.
+#
+# Usage: python spoofer.py [config_file]
+# The configuration file should have the following format:
+# Body: <email body>
+# Subject: <email subject>
+# From: <sender email address>
+# To: <recipient email address>
+# Email Server: <SMTP server address>
+# Port: <SMTP server port>
+#
+# If no configuration file is provided, the script will prompt the user to enter the required details.
+##
 
 import sys
 import smtplib

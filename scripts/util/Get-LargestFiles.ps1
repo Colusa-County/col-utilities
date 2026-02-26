@@ -1,5 +1,5 @@
 #---------------------------------------------------------------
-# Get-TopFiles.ps1
+# Get-LargestFiles.ps1
 # Author: Henry Graves
 # Date: 2024-06-23
 #

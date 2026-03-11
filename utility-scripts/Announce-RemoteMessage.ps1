@@ -21,4 +21,5 @@ $scriptBlock = {
         $synthesizer.Speak($Message)
     }
 }
+
 Invoke-Command -ComputerName $ComputerName -ScriptBlock $scriptBlock -ArgumentList $Message, $RepeatCount

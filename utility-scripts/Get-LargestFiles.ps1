@@ -45,6 +45,12 @@ foreach ($computer in $ComputerName)
 
     Get-ChildItem -Path $uncRoot -Recurse -File -ErrorAction SilentlyContinue |
     ForEach-Object {
+        #skip the /windows directory to save time
+        if ($_.FullName -like "*\windows\*")
+        {
+            return
+        }
+
         # write to console the current object being processed
         $currentObject = [pscustomobject]@{
             FullName = $_.FullName

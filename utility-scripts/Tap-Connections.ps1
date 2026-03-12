@@ -1,0 +1,185 @@
+##
+# Tap-Connections.ps1
+# Description: This script taps into the network traffic of a specified remote Windows 11 computer by accessing its network adapter and capturing packets. It requires administrative privileges on the target computer and the ability to access its network interfaces remotely.
+# Parameters:
+#    -TargetComputer: The name of the remote computer to tap into
+# Example usage:
+#    .\Tap-Connections.ps1 -TargetComputer "RemotePC"
+##
+
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory = $true)]
+    [string]$TargetComputer,
+
+    [Parameter(Mandatory = $false)]
+    [int]$sleepTimer = 5
+)
+
+# Check for administrative privileges
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
+{
+    Write-Warning "This script must be run as an Administrator. Please restart PowerShell as Administrator and try again."
+    exit 1
+}
+
+# Check if the target computer is online
+if (-not (Test-Connection -ComputerName $TargetComputer -Count 1 -Quiet))
+{
+    Write-Warning "Computer $TargetComputer is not reachable. Please check the computer name and network connection, then try again."
+    exit 1
+}
+
+$networkInterfaces = $null
+
+# Attempt to access the network interfaces of the target computer
+try {
+    Write-Host "Attempting to access network interfaces on $TargetComputer..." -ForegroundColor Green
+    $networkInterfaces = Get-WmiObject -Class Win32_NetworkAdapter -ComputerName $TargetComputer -ErrorAction Stop
+
+    if ($networkInterfaces) {
+        Write-Host "Successfully accessed network interfaces on $TargetComputer." -ForegroundColor Green
+        Write-Host "Available Network Adapters:" -ForegroundColor Cyan
+        foreach ($adapter in $networkInterfaces) {
+            Write-Host "Name: $($adapter.Name), MAC Address: $($adapter.MACAddress), Status: $($adapter.NetConnectionStatus)" -ForegroundColor Yellow
+        }
+
+    }
+    else {
+        Write-Warning "No network interfaces found on $TargetComputer."
+    }
+}
+catch {
+    Write-Output "Failed to access network interfaces on $TargetComputer : $($_.Exception.Message)"
+}
+
+
+$stateMap = @{
+    1 = 'Closed'; 2 = 'Listen'; 3 = 'SynSent'; 4 = 'SynReceived'; 5 = 'Established'; 
+    6 = 'FinWait1'; 7 = 'FinWait2'; 8 = 'CloseWait'; 9 = 'Closing'; 10 = 'LastAck'; 
+    11 = 'TimeWait'; 12 = 'DeleteTCB'
+}
+
+$dnsCache = @{}
+$previousConnections = @{}
+
+
+try {
+    Write-Host "Realtime inbound/outbound connections on $TargetComputer : (Ctrl+C to stop)" -ForegroundColor Green
+    Write-Host "Updates will begin in 5 seconds..." -ForegroundColor Yellow
+    Start-Sleep 5
+    Clear-Host
+
+    while ($true) {
+        Write-Host "Realtime inbound/outbound connections on $TargetComputer : (Ctrl+C to stop)" -ForegroundColor Green
+        Write-Host "Refresh: $(Get-Date) | Target: $TargetComputer" -ForegroundColor Yellow
+        Write-Host "======================================================================================================================" -ForegroundColor Cyan
+        $processMap = @{}
+        Get-WmiObject -Class Win32_Process -ComputerName $TargetComputer -ErrorAction Stop |
+            ForEach-Object { 
+                $processMap[[int]$_.ProcessId] = [PSCustomObject]@{
+                    Name=$_.Name; CmdLine=$_.CommandLine
+                }
+            }
+
+        $tcpConnections = Get-WmiObject -Namespace root\StandardCimv2 -Class MSFT_NetTCPConnection -ComputerName $TargetComputer -ErrorAction Stop
+
+        
+
+        # Get-WmiObject -Class Win32_Process -ComputerName $TargetComputer | ForEach-Object { $proccessMap[[int]$_.ProcessId] = [PSCustomObject]@{Name=$_.Name; CmdLine=$_.CommandLine}}
+        
+        $enriched = foreach ($c in $tcpConnections) {
+            $stateString = $stateMap[[int]$c.State]
+            $process = $processMap[[int]$c.OwningProcess]
+            $remoteIP = $c.RemoteAddress
+
+            # DNS resolution (cached runs on host (my) machine)
+            $remoteHost = $remoteIP
+            if ($remoteIP -and $remoteIP -notmatch '^127\.|^::1|^0\.0\.0\.0' -and -not $dnsCache.ContainsKey($remoteIP)) {
+                try {
+                    $dnsCache[$remoteIP] = (Resolve-DnsName $remoteIP -Type PTR -ErrorAction Stop).NameHost
+
+                } catch { $dnsCache[$remoteIP] = $remoteIP }
+            }
+
+            if ($dnsCache.ContainsKey($remoteIP)) { $remoteHost = $dnsCache[$remoteIP] }
+
+            # direction heuristic
+            $direction = if ($stateString -eq 'Listen') {
+                'Listening (Inbound)'
+            }
+            elseif ($stateString -eq 'Established') {
+                if ($c.LocalPort -ge 1024 -and $c.RemotePort -le 1023) { 'Outbound (client -> server)' }
+                elseif ($c.LocalPort -le 1023 -and $c.RemotePort -ge 1024) { 'Inbound (server -> client)' }
+                else { 'Established (unknown direction)' }
+            } else { $stateString }
+
+            $key = "$($c.LocalAddress):$($c.LocalPort) -> $($c.RemoteAddress):$($c.RemotePort) PID:$($c.OwningProcess)"
+
+
+            [PSCustomObject]@{
+                Protocol = 'TCP'
+                Local = "$($c.LocalAddress):$($c.LocalPort)"
+                RemoteIP = $remoteIP
+                RemoteHost = $remoteHost
+                RemotePort = $c.RemotePort
+                State = $stateString
+                Direction = $direction
+                ProcessName = $process.Name
+                PID = $c.OwningProcess
+                CommandLine = $process.CmdLine
+                IsNew = -not $previousConnections.ContainsKey($key)
+            }
+        }
+
+        # udp listeners (in case of exfil malware)
+        $udpConnections = Get-WmiObject -Namespace root\StandardCimv2 -Class MSFT_NetUDPEndpoint -ComputerName $TargetComputer -ErrorAction SilentlyContinue
+
+        $udpEnriched = $udpConnections | ForEach-Object {
+            $process = $processMap[[int]$_.OwningProcess]
+            [PSCustomObject]@{
+                Protocol = 'UDP'
+                Local = "$($_.LocalAddress):$($_.LocalPort)"
+                RemoteIP = '*'
+                RemoteHost = '*'
+                RemotePort = '*'
+                State = 'N/A'
+                Direction = 'UDP Listener'
+                ProcessName = $process.Name
+                PID = $_.OwningProcess
+                CommandLine = $process.CmdLine
+                IsNew = $false
+            }
+        }
+
+        $all = $enriched + $udpEnriched | Sort-Object Direction, ProcessName, Local, RemoteIP, RemotePort
+
+        # display highlights on new connections
+        $all | Format-Table -AutoSize -Wrap @{
+            Label = "Connection"; 
+            Expression = { 
+                if ($_.IsNew) { 
+                    ">>> $($_.Local) -> $($_.RemoteHost):$($_.RemotePort): " 
+                } 
+                else { 
+                    "$($_.Local) -> $($_.RemoteHost):$($_.RemotePort): " 
+                } 
+            }
+        }, Direction, ProcessName, PID, State, CommandLine
+
+        # update cache
+        $previousConnections.Clear()
+        $enriched | ForEach-Object {
+            $previousConnections[$_.Local + '->' + $_.RemoteIP] = $true
+        }
+
+        Start-Sleep -Seconds $sleepTimer
+    }
+}
+catch {
+    Write-Warning "Error: $($_.Exception.Message)"
+
+} finally {
+    Write-Host "Monitoring stopped. Exiting." -ForegroundColor Green
+}
+

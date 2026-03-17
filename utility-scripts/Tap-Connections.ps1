@@ -13,15 +13,78 @@ param (
     [string]$TargetComputer,
 
     [Parameter(Mandatory = $false)]
-    [int]$sleepTimer = 5
-)
+    [string]$manualMode = "",
 
+    [Parameter(Mandatory = $false)]
+    [int]$sleepTimer = 5
+
+)
 # Check for administrative privileges
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
 {
     Write-Warning "This script must be run as an Administrator. Please restart PowerShell as Administrator and try again."
     exit 1
 }
+$warning = "
+
+
+
+
+
+
+
+
+
+
+
+            _______    _______    _         _________   _          _______ 
+|\     /|  (  ___  )  (  ____ )  ( (    /|  \__   __/  ( (    /|  (  ____ \
+| )   ( |  | (   ) |  | (    )|  |  \  ( |     ) (     |  \  ( |  | (    \/
+| | _ | |  | (___) |  | (____)|  |   \ | |     | |     |   \ | |  | |      
+| |( )| |  |  ___  |  |     __)  | (\ \) |     | |     | (\ \) |  | | ____ 
+| || || |  | (   ) |  | (\ (     | | \   |     | |     | | \   |  | | \_  )
+| () () |  | )   ( |  | ) \ \__  | )  \  |  ___) (___  | )  \  |  | (___) |
+(_______)  |/     \|  |/   \__/  |/    )_)  \_______/  |/    )_)  (_______)
+"
+
+# Clear the screen and display banner
+Clear-Host
+
+Write-Host $warning -ForegroundColor Red
+
+# play a small beep to get their attention
+[console]::beep(500, 700)
+[console]::beep(500, 700)
+
+
+Clear-Host
+
+# output "WARNING" in ascii art in red
+Write-Host $warning -ForegroundColor Red
+
+# Display big warning in red about proper usage of this script, and force user to press enter to confirm they understand the risks
+Write-Host "WARNING: This script is intended for ethical use only. Unauthorized access to computer systems is illegal and unethical. 
+Ensure you have explicit permission to access the target computer and its network traffic before proceeding.
+" -ForegroundColor Red
+
+# display their username and current computer name for accountability
+$currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+$currentComputer = $env:COMPUTERNAME
+Write-Host "Current User: $currentUser" -ForegroundColor Yellow
+Write-Host "Current Computer: $currentComputer" -ForegroundColor Yellow
+
+Write-Host "
+By proceeding, you confirm that you understand the risks and have the necessary permissions to use this script responsibly." -ForegroundColor Red
+
+# force the user to type "confirm" to proceed
+$confirmation = Read-Host "
+Type 'confirm' to proceed or Ctrl+C to exit"
+if ($confirmation -ne "confirm") {
+    Write-Host "Confirmation not received. Exiting script." -ForegroundColor Yellow
+    exit 1
+}
+
+Clear-Host
 
 # Check if the target computer is online
 if (-not (Test-Connection -ComputerName $TargetComputer -Count 1 -Quiet))
@@ -66,9 +129,17 @@ $previousConnections = @{}
 
 try {
     Write-Host "Realtime inbound/outbound connections on $TargetComputer : (Ctrl+C to stop)" -ForegroundColor Green
-    Write-Host "Updates will begin in 5 seconds..." -ForegroundColor Yellow
-    Start-Sleep 5
-    Clear-Host
+    if ($manualMode -eq "-m" -or $manualMode -eq "--manual") {
+        Write-Host "
+        
+        Manual mode enabled. Press Enter to retreive connections..." -ForegroundColor Cyan
+        Read-Host
+    } else {
+        Write-Host "
+        
+        Auto-refresh every $sleepTimer seconds. Press Ctrl+C to stop." -ForegroundColor Yellow
+        Start-Sleep 5
+    }
 
     while ($true) {
         Write-Host "Realtime inbound/outbound connections on $TargetComputer : (Ctrl+C to stop)" -ForegroundColor Green
@@ -173,7 +244,12 @@ try {
             $previousConnections[$_.Local + '->' + $_.RemoteIP] = $true
         }
 
-        Start-Sleep -Seconds $sleepTimer
+        if ($manualMode -eq "-m" -or $manualMode -eq "--manual") {
+            Write-Host "Manual mode enabled. Press Enter to refresh connections..." -ForegroundColor Cyan
+            Read-Host
+        } else {
+            Start-Sleep -Seconds $sleepTimer
+        }
     }
 }
 catch {

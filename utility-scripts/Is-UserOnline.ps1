@@ -1,4 +1,12 @@
-#Requires -RunAsAdministrator
+##
+# Script Name: Is-UserOnline.ps1
+# Description: This script checks if a specified user is currently online by querying their last logon time from Active Directory. If the last logon time is within the last 15 minutes, the script considers the user to be online.
+# Parameters:
+#    -Username: The username of the user to check (e.g., "jdoe")
+# Example usage:
+#    .\Is-UserOnline.ps1 -Username "jdoe"
+##
+
 
 param (
     [Parameter(Mandatory=$true)]
@@ -43,10 +51,10 @@ function Is-UserOnline {
 
 
 $isOnline = Is-UserOnline -Username $Username
-# if ($isOnline) {
-#     Write-Host "User $Username is online."
-#     exit 0
-# } else {
-#     Write-Host "User $Username is offline."
-#     exit 1
-# }
+if ($isOnline) {
+    Write-Host "User $Username is online."
+    exit 0
+} else {
+    Write-Host "User $Username is offline."
+    exit 1
+}

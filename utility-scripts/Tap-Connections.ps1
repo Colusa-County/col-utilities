@@ -19,6 +19,10 @@ param (
     [int]$sleepTimer = 5
 
 )
+
+# force manual mode for now
+$manualMode = "--manual"
+
 # Check for administrative privileges
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
 {
@@ -246,7 +250,12 @@ try {
 
         if ($manualMode -eq "-m" -or $manualMode -eq "--manual") {
             Write-Host "Manual mode enabled. Press Enter to refresh connections..." -ForegroundColor Cyan
-            Read-Host
+            Write-Host "type 'exit' to stop monitoring." -ForegroundColor Yellow
+            $input = Read-Host
+            if ($input -eq "exit") {
+                Write-Host "Exiting monitoring loop." -ForegroundColor Green
+                break
+            }
         } else {
             Start-Sleep -Seconds $sleepTimer
         }

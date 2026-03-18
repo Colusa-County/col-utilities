@@ -57,6 +57,8 @@ while ($true) {
         Write-Host "cutil" -ForegroundColor Cyan -NoNewline
             Write-Host ")→ " -ForegroundColor Red -NoNewLine
 
+    # change cursor color to green for input
+    # $host.UI.RawUI.ForegroundColor = "DarkGreen"
 
     $input = Read-Host
 

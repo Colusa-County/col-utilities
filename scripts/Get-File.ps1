@@ -32,6 +32,10 @@ Write-Host ""
 
 
 Write-Host "Attempting to copy file from $TargetComputer..."
+Write-Host ""
+# prompt for admin credentials
+# $credentials = Get-Credential -Message "Enter admin credentials for $TargetComputer"
+
 try {
     if (Test-Path $RemoteFilePath -ErrorAction Stop) {
         Write-Host "File found!" -ForegroundColor Green

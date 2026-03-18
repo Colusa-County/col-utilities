@@ -32,14 +32,14 @@ Write-Host "Have a script suggestion/request? send an email to: " -ForegroundCol
 Write-Host "hgraves@countyofcolusaca.gov" -ForegroundColor Cyan
 write-Host ""
 write-Host ""
-Write-Host "
+$banner = "
  ▄▄▄▄ ██  ██ ▄▄▄▄▄▄ ▄▄ ▄▄    
 ██▀▀▀ ██  ██   ██   ██ ██    
 ▀████ ▀████▀   ██   ██ ██▄▄▄  Colusa County Script Utilities v$version                         
-" -ForegroundColor Magenta
-
+"
+Write-Host $banner -ForegroundColor Magenta
 # get absolute path to the utility-scripts folder for later use
-$utilityScriptsPath = Join-Path -Path (Get-Location) -ChildPath "utility-scripts"
+$utilityScriptsPath = Join-Path -Path (Get-Location) -ChildPath "scripts"
 
 #load all available scripts in the utility-scripts folder into an array for later use
 $availableScripts = Get-ChildItem -Path $utilityScriptsPath -Filter "*.ps1" | ForEach-Object { $_.BaseName }
@@ -50,7 +50,8 @@ while ($true) {
     Write-Host "┌──(" -ForegroundColor Red -NoNewLine
         Write-Host "$(whoami)" -ForegroundColor Cyan -NoNewline
             Write-Host ")→ " -ForegroundColor Red -NoNewLine
-                Write-Host "$(Get-Location)" -ForegroundColor Cyan
+                Write-Host "$(Get-Location)" -ForegroundColor Cyan -NoNewLine
+                    Write-Host " ~" -ForegroundColor Red
     Write-Host "│" -ForegroundColor Red
     Write-Host "└─(" -ForegroundColor Red -NoNewline
         Write-Host "cutil" -ForegroundColor Cyan -NoNewline
@@ -94,6 +95,12 @@ while ($true) {
             if ($input -eq "version")
             {
                 Write-Host "CUtil version 1.0.0" -ForegroundColor Green
+            }
+
+            elseif ($input -eq "clear" -or $input -eq "cls")
+            {
+                Clear-Host
+                Write-Host $banner -ForegroundColor Magenta
             }
 
             elseif ($input -eq "usmt")

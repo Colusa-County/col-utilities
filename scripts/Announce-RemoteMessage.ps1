@@ -1,4 +1,16 @@
-# target a computer (taken in by parameters) on the network by hostname and announce a message taken in by param via text to speech
+##
+# Announce-RemoteMessage.ps1
+# Description: This script takes a computer name and a string message as input, then uses text-to-speech to announce the message aloud on the specified remote computer. It also includes an optional parameter to specify how many times the message should be repeated.
+# Parameters:
+#    -ComputerName: The name of the remote computer to announce the message on (required
+#    -Message: The string message to be announced (required)
+#    -RepeatCount: The number of times to repeat the announcement (optional, default is
+# Example usage:
+#    .\Announce-RemoteMessage.ps1 -ComputerName "RemotePC" -Message "Hello, this is an announcement!" -RepeatCount 3
+#
+# Note: This script requires that PowerShell remoting is enabled on the target computer and that the user has the necessary permissions to execute commands remotely.
+##
+
 param (
     [Parameter(Mandatory=$true)]
     [string]$ComputerName,

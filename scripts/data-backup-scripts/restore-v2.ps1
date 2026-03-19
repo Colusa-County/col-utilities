@@ -38,7 +38,7 @@ function Select-Backup {
 
 Clear-Host
 
-$NetworkDrive = "U:"
+$NetworkDrive = "U"
 $UserProfile = $env:USERPROFILE
 
 # Test network drive access

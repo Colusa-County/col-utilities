@@ -98,34 +98,19 @@ while ($true) {
             {
                 Write-Host "CUtil version 1.0.0" -ForegroundColor Green
             }
-
-            elseif ($input -eq "clear" -or $input -eq "cls")
-            {
-                Clear-Host
-                Write-Host $banner -ForegroundColor Magenta
-            }
-
-            elseif ($input -eq "usmt")
-            {
-                # get credentials to run USMT with, since it needs to be run as admin
-                $credential = Get-Credential -Message "Enter credentials to run USMT with"
-                Start-Process -FilePath "$utilityScriptsPath/../USMT/usmt.exe" -Credential $credential -Wait
-                
-                # Invoke-Expression "$utilityScriptsPath/../USMT/usmt.exe"
-            }
-
-            # if input is a command in availableScripts, execute the corresponding script with the provided parameters
-            elseif ($availableScripts -contains $input.Split(" ")[0]) {
-                Invoke-Expression "$utilityScriptsPath/$input"
-            }
-
             elseif ($input -eq "")
             {
                 # do nothing
             }
 
+            # if input is a command in availableScripts, execute the corresponding script with the provided parameters
+            if ($availableScripts -contains $input.Split(" ")[0]) {
+                Invoke-Expression "$utilityScriptsPath/$input"
+            }
             else
             {
+                # fall back to trying to execute the input as a command directly in case it's a valid PowerShell command or an alias for one, 
+                # this allows users to run regular PowerShell commands without having to exit cUtil
                 Invoke-Expression $input
             }
 

@@ -1,6 +1,12 @@
+##
+# Fix-AppCorruption.ps1
+# Description: This script attempts to fix app corruption issues by removing all installed apps for all users and then reinstalling the built-in apps. It uses Get-AppxPackage to retrieve the list of installed apps, Remove-AppxPackage to uninstall them, and Add-AppxPackage to reinstall the built-in apps from their manifest files.
+# Parameters:
+#    None
+# Example usage:
+#    .\Fix-AppCorruption.ps1
+##
 
-
-# Get all installed apps
 $installedApps = Get-AppxPackage -AllUsers
 
 # remove all apps for all users

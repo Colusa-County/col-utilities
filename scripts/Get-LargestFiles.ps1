@@ -1,13 +1,13 @@
-#---------------------------------------------------------------
+##
 # Get-LargestFiles.ps1
-# Author: Henry Graves
-# Date: 2024-06-23
-#
 # Description: Scans the C$ share of a specified computer for the largest files and exports the list to a CSV file.
+# Parameters:
+#    -ComputerName: The name of the target computer to scan for large files 
+#
 # Usage: .\Get-TopFiles.ps1 -ComputerName "TargetComputerName"
-#---------------------------------------------------------------
+##
 
-
+[CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromRemainingArguments=$true)]
     [string[]] $ComputerName = $env:COMPUTERNAME

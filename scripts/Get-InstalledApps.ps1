@@ -1,1 +1,0 @@
-Get-AppxProvisionedPackage -Online | Select-Object DisplayName, PackageName

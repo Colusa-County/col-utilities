@@ -19,8 +19,24 @@ $SourceFolders = @(
     "$UserProfile\Documents",
     "$UserProfile\Desktop",
     "$UserProfile\Pictures"
-    #"$UserProfile\Downloads"
+    "$UserProfile\Downloads",
+    "$UserProfile\Videos",
+    "$UserProfile\Music"
 )
+
+# get list of mapped drives for the current user to check if the network drive is already mapped, if not, attempt to map it
+$MappedDrives = Get-PSDrive -PSProvider FileSystem | Select-Object -ExpandProperty Name
+if ($MappedDrives -notcontains $NetworkDrive) {
+    try {
+        # prompt for the network path to the backup location, defaulting to "\\server\share" if the user just presses enter without typing anything
+        $NetworkPath = Read-Host -Prompt "Enter the network path to the backup location (e.g., \\server\share)" -Default "\\server\share"
+        New-PSDrive -Name $NetworkDrive.TrimEnd(':') -PSProvider FileSystem -Root $NetworkPath -Persist
+        Write-Host "Mapped network drive $NetworkDrive successfully." -ForegroundColor Green
+    } catch {
+        Write-Error "Failed to map network drive $NetworkDrive: $($_.Exception.Message)"
+        exit 1
+    }
+}
 
 function Test-NetworkDrive {
     param($DrivePath)

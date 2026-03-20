@@ -102,6 +102,13 @@ while ($true) {
             {
                 # do nothing
             }
+            
+            if ($input -eq "launch-gui")
+            {
+                # launch the GUI script
+                Invoke-Expression "$utilityScriptsPath/../cutil-gui.ps1"
+                continue
+            }
 
             # if input is a command in availableScripts, execute the corresponding script with the provided parameters
             if ($availableScripts -contains $input.Split(" ")[0]) {
@@ -109,9 +116,8 @@ while ($true) {
             }
             else
             {
-                # fall back to trying to execute the input as a command directly in case it's a valid PowerShell command or an alias for one, 
-                # this allows users to run regular PowerShell commands without having to exit cUtil
                 Invoke-Expression $input
+                
             }
 
         }

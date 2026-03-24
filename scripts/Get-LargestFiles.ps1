@@ -10,7 +10,10 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true, Position=0, ValueFromRemainingArguments=$true)]
-    [string[]] $ComputerName = $env:COMPUTERNAME
+    [string[]] $ComputerName = $env:COMPUTERNAME,
+
+    [Parameter(Mandatory=$false)]
+    [string] $full
 )
 
 $computersScanned = @()
@@ -39,7 +42,16 @@ foreach ($computer in $ComputerName)
 
     $allFiles = @()
 
-    $uncRoot = "\\$computer\C$\Users"
+    if ($full -eq "--full" -or $full -eq "-f") {
+        Write-Host "Performing full scan of $computer. This may take some time..." -ForegroundColor Yellow
+        $uncRoot = "\\$computer\C$"
+    }
+    else {
+        Write-Host "Performing quick scan of $computer (only scanning user directories). Use --full switch for a complete scan." -ForegroundColor Yellow
+        $uncRoot = "\\$computer\C$\Users"
+        
+    }
+
     Write-Host "Scanning drive $uncRoot for files..."
     # exit 1
 

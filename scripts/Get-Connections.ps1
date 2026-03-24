@@ -1,10 +1,10 @@
 ##
-# Tap-Connections.ps1
-# Description: This script taps into the network traffic of a specified remote Windows 11 computer by accessing its network adapter and capturing packets. It requires administrative privileges on the target computer and the ability to access its network interfaces remotely.
+# Get-Connections.ps1
+# Description: This script retrieves information about active network connections on a specified remote Windows 11 computer. It requires administrative privileges on the target computer and the ability to access its network interfaces remotely.
 # Parameters:
-#    -TargetComputer: The name of the remote computer to tap into
+#    -TargetComputer: The name of the remote computer to query
 # Example usage:
-#    .\Tap-Connections.ps1 -TargetComputer "RemotePC"
+#    .\Get-Connections.ps1 -TargetComputer "RemotePC"
 ##
 
 [CmdletBinding()]

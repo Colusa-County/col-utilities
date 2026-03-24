@@ -101,8 +101,10 @@ while ($true) {
             elseif ($input -eq "")
             {
                 # do nothing
+                write-host ""
+                continue
             }
-            
+
             if ($input -eq "launch-gui")
             {
                 # launch the GUI script

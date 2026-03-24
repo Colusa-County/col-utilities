@@ -1,7 +1,8 @@
 
 # @name         Backup Script
-# @author       Henry Graves
-# @date         6/23/2025
+#
+#   DEPRECATED
+#
 # @description  Backs up a users data from their current PC to their U: drive on
 #               the network. At the moment it is a very dumb script, it blindly
 #               grabs everything in the users" Desktop, Documents, Pictures and
@@ -33,7 +34,7 @@ if ($MappedDrives -notcontains $NetworkDrive) {
         New-PSDrive -Name $NetworkDrive.TrimEnd(':') -PSProvider FileSystem -Root $NetworkPath -Persist
         Write-Host "Mapped network drive $NetworkDrive successfully." -ForegroundColor Green
     } catch {
-        Write-Error "Failed to map network drive $NetworkDrive: $($_.Exception.Message)"
+        Write-Error "Failed to map network drive $NetworkDrive : $($_.Exception.Message)"
         exit 1
     }
 }

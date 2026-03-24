@@ -1,14 +1,9 @@
 
-# @name         Restore Script
-# @author       Henry Graves
-# @date         6/23/2025
-# @description  Restores a users data from their U: network drive after
-#               a backup was created using the corresponding backup script.
-#               Currently this script only works properly if used on the same
-#               day as the backup script as it uses datestamps to target the
-#               correct backup folder on the U: drive. This may be improved
-#               in the future.
-# @usage        Simply run the script.
+##
+##
+## DEPRECATED
+##
+##
 
 $NetworkDrive = "U:"
 $BackupDate = Get-Date -Format "MM-dd-yyyy"

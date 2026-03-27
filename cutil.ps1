@@ -47,10 +47,29 @@ public class ConsoleCtrlHandler
 
 $version = "1.0.0"
 
+# compute the hash of the cutil.ps1 file and store it in a variable to check for changes later
+function Get-FileHashString {
+    param (
+        [string]$filePath
+    )
+    if (Test-Path -Path $filePath) {
+        $hash = Get-FileHash -Path $filePath -Algorithm SHA256
+        return $hash.Hash
+    }
+    else {
+        Write-Host "File not found: $filePath" -ForegroundColor Red
+        return $null
+    }
+}
+
+$versionHash = Get-FileHashString -filePath $MyInvocation.MyCommand.Path
+
 $storeLocation = ""
 $configFilePath = ""
 
 Clear-Host
+Write-Host ""
+Write-Host $versionHash -ForegroundColor Yellow
 Write-Host ""
 Write-Host "Welcome to cUtil v$version - your command line utility for running scripts!" -ForegroundColor Green
 Write-Host "Type 'help' to see available commands, or 'exit' to quit." -ForegroundColor Green

@@ -91,6 +91,9 @@ try {
             break
         }
 
+        ##
+        ## HELP COMMAND BLOCK
+        ##
         # if the first word of the input is "help" flow into this if statement to provide usage information for the specified command
         elseif ($input.Split(" ")[0] -eq "help" -or $input.Split(" ")[0] -eq "commands")
         {
@@ -103,6 +106,27 @@ try {
                     }
                 }
             }
+            # else if user types "help" with partial command name, show commands that match the partial name
+            elseif ($input.Split(" ").Length -eq 2) {
+                $partialName = $input.Split(" ")[1]
+                $matchingCommands = $availableScripts | Where-Object { $_ -like "*$partialName*" }
+                $matchedCommand = ""
+                if ($matchingCommands.Count -gt 0) {
+                    Write-Host "Commands matching '$partialName':" -ForegroundColor Green
+                    $matchingCommands | ForEach-Object { Write-Host "  $_" -ForegroundColor Cyan; $matchedCommand = $_ }
+                }
+                # if matching commands.count is == 1 then also show usage information for the matching command
+                if ($matchingCommands.Count -eq 1) {
+                    Write-Host "Usage information for command: $($matchedCommand)" -ForegroundColor Green
+                    Write-Host "----------------------------------------" -ForegroundColor Green
+                    Get-Content -Path "$utilityScriptsPath/$($matchedCommand).ps1" | ForEach-Object {
+                        if ($_ -match "^#") {
+                            Write-Host $_ -ForegroundColor Cyan
+                        }
+                    }
+                }
+            }
+            
             else {
                 # display available scripts by listing the files in the utility-scripts folder
                 Write-Host "Available scripts:" -ForegroundColor Green
@@ -114,6 +138,10 @@ try {
                 Write-Host "  exit" -ForegroundColor Cyan
             }
         }
+        ##
+        ## END HELP COMMAND BLOCK
+        ##
+        
         else {
             try {
 

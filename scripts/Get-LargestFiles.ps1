@@ -9,11 +9,11 @@
 
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromRemainingArguments=$true)]
-    [string[]] $ComputerName = $env:COMPUTERNAME,
+    [Parameter(Mandatory=$true)]
+    [string[]] $ComputerNames = $env:COMPUTERNAME,
 
     [Parameter(Mandatory=$false)]
-    [string] $full
+    [string] $option
 )
 
 $computersScanned = @()
@@ -26,10 +26,10 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     exit 1
 }
 
-Write-Host "Computers to scan: $ComputerName"
+Write-Host "Computers to scan: $ComputerNames"
 Write-Host ""
 
-foreach ($computer in $ComputerName)
+foreach ($computer in $ComputerNames)
 {
 
     # check if computer is online first
@@ -42,7 +42,7 @@ foreach ($computer in $ComputerName)
 
     $allFiles = @()
 
-    if ($full -eq "--full" -or $full -eq "-f") {
+    if ($option -eq "--full" -or $option -eq "-f") {
         Write-Host "Performing full scan of $computer. This may take some time..." -ForegroundColor Yellow
         $uncRoot = "\\$computer\C$"
     }
@@ -55,6 +55,7 @@ foreach ($computer in $ComputerName)
     Write-Host "Scanning drive $uncRoot for files..."
     # exit 1
 
+    
     Get-ChildItem -Path $uncRoot -Recurse -File -ErrorAction SilentlyContinue |
     ForEach-Object {
         #skip the /windows directory to save time
@@ -63,27 +64,47 @@ foreach ($computer in $ComputerName)
             return
         }
 
+
         # write to console the current object being processed
         $currentObject = [pscustomobject]@{
             FullName = $_.FullName
             Length = $_.Length
         }
         # write progress to console
-        Write-Progress -Activity "Scanning files on $computer" -Status "Processing file: $($currentObject.FullName)" -PercentComplete 0 
+        Write-Progress -Activity " " -Status "Processing file: $($currentObject.FullName)" -PercentComplete 0 
 
         # Write-Host "Processing file: $($currentObject.FullName) - Size: $($currentObject.Length) bytes"
 
         $allFiles += $currentObject
     }
 
+    # loop through each users's AppData folder and get all files within it, add to $allFiles array
+    Get-ChildItem -Path $uncRoot -Recurse -File -ErrorAction SilentlyContinue |
+    ForEach-Object {
+        if ($_.FullName -like "*\AppData\*")
+        {
+            $currentObject = [pscustomobject]@{
+                FullName = $_.FullName
+                Length = $_.Length
+            }
+            # write progress to console
+            Write-Progress -Activity " " -Status "Processing file: $($currentObject.FullName)" -PercentComplete 0 
+
+            # Write-Host "Processing file: $($currentObject.FullName) - Size: $($currentObject.Length) bytes"
+
+            $allFiles += $currentObject
+        }
+    }
+
+
     $topFiles = $allFiles | Sort-Object -Property Length -Descending
 
     $topFiles | ForEach-Object {
-        # if any file is over 1GB in size, write to console
-        if ($_.Length -gt 1GB)
+        # if any file is over 0.5 GB, write a warning to the console
+        if ($_.Length -gt 0.5GB)
         {
             $sizeInGB = [math]::Round($_.Length / 1GB, 2)
-            Write-Host "Large file found: $($_.FullName) - Size: $sizeInGB GB" -ForegroundColor Red
+            Write-Host "Large file found on $computer : $($_.FullName) - Size: $sizeInGB GB" -ForegroundColor Red
         }
     }
 
@@ -107,13 +128,13 @@ foreach ($computer in $ComputerName)
     Write-Host ""
     Write-Host "Exported largest files list to $exportPath" -ForegroundColor Green
     Write-Host "---------------------------------------------------------------"
-    # output total disk space used and remaining on C: drive of target computer, add to csv file
-    $disk = Get-WmiObject -Class Win32_LogicalDisk -ComputerName $computer -Filter "DeviceID='C:'"
-    $totalSizeGB = [math]::Round($disk.Size / 1GB, 2)
-    $freeSpaceGB = [math]::Round($disk.FreeSpace / 1GB, 2)
-    $usedSpaceGB = [math]::Round($totalSizeGB - $freeSpaceGB, 2)
-    Write-Host "C: Drive on $computer - Total Size: $totalSizeGB GB, Used Space: $usedSpaceGB GB, Free Space: $freeSpaceGB GB"
-    Write-Host "---------------------------------------------------------------"
+    # # output total disk space used and remaining on C: drive of target computer, add to csv file
+    # $disk = Get-WmiObject -Class Win32_LogicalDisk -ComputerName $computer -Filter "DeviceID='C:'"
+    # $totalSizeGB = [math]::Round($disk.Size / 1GB, 2)
+    # $freeSpaceGB = [math]::Round($disk.FreeSpace / 1GB, 2)
+    # $usedSpaceGB = [math]::Round($totalSizeGB - $freeSpaceGB, 2)
+    # Write-Host "C: Drive on $computer - Total Size: $totalSizeGB GB, Used Space: $usedSpaceGB GB, Free Space: $freeSpaceGB GB"
+    # Write-Host "---------------------------------------------------------------"
 
     
     Write-Host ""

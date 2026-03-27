@@ -1,11 +1,11 @@
 ##
-# Add-Group.ps1
-# Description: This script adds a user account to a specified security group in Active Directory.
+# Remove-Group.ps1
+# Description: This script removes a user account from a specified security group in Active Directory.
 # Parameters:
-#    -Username: The username of the account to be added to the group (required)
-#    -GroupName: The name of the security group to which the user will be added (required)
+#    -Username: The username of the account to be removed from the group (required)
+#    -GroupName: The name of the security group from which the user will be removed (required)
 # Example usage:
-#    .\Add-Group.ps1 -Username "jdoe" -GroupName "IT Department"
+#    .\Remove-Group.ps1 -Username "jdoe" -GroupName "IT Department"
 ##
 
 [CmdletBinding()]
@@ -47,11 +47,10 @@ catch {
     exit
 }
 
-
 try {
-    Add-ADGroupMember -Identity $GroupName -Members $Username -ErrorAction Stop
-    Write-Host "The user '$Username' has been successfully added to the group '$GroupName'." -ForegroundColor Green
+    Remove-ADGroupMember -Identity $GroupName -Members $Username -Confirm:$false -ErrorAction Stop
+    Write-Host "The user '$Username' has been successfully removed from the group '$GroupName'." -ForegroundColor Green
 }
 catch {
-    Write-Error "An error occurred while trying to add the user to the group: $_"
+    Write-Error "An error occurred while trying to remove the user from the group: $_"
 }

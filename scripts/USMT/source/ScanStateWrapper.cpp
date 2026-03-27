@@ -1,3 +1,12 @@
+/**
+    * ScanStateWrapper.cpp
+    *
+    * This file contains the implementation of the ScanStateWrapper class, which serves as a wrapper for the User State Migration Tool (USMT) scanstate and loadstate commands. The class provides methods to configure and execute these commands, as well as to manage related properties such as the configuration file, store directory, and binary path.
+    *
+    * Author: Henry Graves
+    * Version: 0.0.5
+*/
+
 #include "ScanStateWrapper.h"
 
 ScanStateWrapper::ScanStateWrapper()

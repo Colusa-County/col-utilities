@@ -70,7 +70,19 @@ $banner = "
 Write-Host $banner -ForegroundColor Magenta
 $utilityScriptsPath = Join-Path -Path (Get-Location) -ChildPath "scripts"
 
-$availableScripts = Get-ChildItem -Path $utilityScriptsPath -Filter "*.ps1" | ForEach-Object { $_.BaseName }
+function Get-AvailableScripts{
+    try {
+        $availableScripts = Get-ChildItem -Path $utilityScriptsPath -Filter "*.ps1" | ForEach-Object { $_.BaseName }
+    }
+    catch {
+        Write-Host "Error loading available scripts: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "Use the set-script-path command to specify the correct path to the utility scripts." -ForegroundColor Yellow
+        $availableScripts = @()
+    }
+    return $availableScripts
+}
+
+$availableScripts = Get-AvailableScripts
 
 try {
     while ($true) {
@@ -82,33 +94,53 @@ try {
                         Write-Host " ~" -ForegroundColor Red
         Write-Host "│" -ForegroundColor Red
         Write-Host "└─(" -ForegroundColor Red -NoNewline
-            Write-Host "cutil" -ForegroundColor Cyan -NoNewline
+            Write-Host "cUtil" -ForegroundColor Cyan -NoNewline
                 Write-Host ")→ " -ForegroundColor Red -NoNewLine
 
-        $input = Read-Host
-        if ($input -eq "exit") {
+        $UserInput = Read-Host
+
+        if ($UserInput -eq "exit") {
             Write-Host "Exiting cUtil. Goodbye!" -ForegroundColor Green
             break
+        }
+
+        if ($UserInput -eq "set-script-path") {
+            # check for the argument passed in with the set-script-path command, if no argument is passed in prompt the user to enter a path
+            if ($UserInput.Split(" ").Length -eq 1) {
+                $utilityScriptsPath = Read-Host "Enter the new path to the utility scripts"
+            }
+            else {
+                $utilityScriptsPath = $UserInput.Split(" ")[1]
+            }
+            Write-Host "Utility scripts path set to: $utilityScriptsPath" -ForegroundColor Green
+            write-host ""
+            $availableScripts = Get-AvailableScripts
+            continue
+        }
+        if ($UserInput -eq "show-script-path") {
+            Write-Host "Current utility scripts path: $utilityScriptsPath" -ForegroundColor Green
+            write-host ""
+            continue
         }
 
         ##
         ## HELP COMMAND BLOCK
         ##
         # if the first word of the input is "help" flow into this if statement to provide usage information for the specified command
-        elseif ($input.Split(" ")[0] -eq "help" -or $input.Split(" ")[0] -eq "commands")
+        if ($UserInput.Split(" ")[0] -eq "help" -or $UserInput.Split(" ")[0] -eq "commands")
         {
-            if ($input.Split(" ").Length -eq 2 -and $availableScripts -contains $input.Split(" ")[1]) {
-                Write-Host "Usage information for command: $($input.Split(" ")[1])" -ForegroundColor Green
+            if ($UserInput.Split(" ").Length -eq 2 -and $availableScripts -contains $UserInput.Split(" ")[1]) {
+                Write-Host "Usage information for command: $($UserInput.Split(" ")[1])" -ForegroundColor Green
                 Write-Host "----------------------------------------" -ForegroundColor Green
-                Get-Content -Path "$utilityScriptsPath/$($input.Split(" ")[1]).ps1" | ForEach-Object {
+                Get-Content -Path "$utilityScriptsPath/$($UserInput.Split(" ")[1]).ps1" | ForEach-Object {
                     if ($_ -match "^#") {
                         Write-Host $_ -ForegroundColor Cyan
                     }
                 }
             }
             # else if user types "help" with partial command name, show commands that match the partial name
-            elseif ($input.Split(" ").Length -eq 2) {
-                $partialName = $input.Split(" ")[1]
+            elseif ($UserInput.Split(" ").Length -eq 2) {
+                $partialName = $UserInput.Split(" ")[1]
                 $matchingCommands = $availableScripts | Where-Object { $_ -like "*$partialName*" }
                 $matchedCommand = ""
                 if ($matchingCommands.Count -gt 0) {
@@ -141,22 +173,22 @@ try {
         ##
         ## END HELP COMMAND BLOCK
         ##
-        
+
         else {
             try {
 
-                if ($input -eq "version")
+                if ($UserInput -eq "version")
                 {
                     Write-Host "CUtil version 1.0.0" -ForegroundColor Green
                 }
-                elseif ($input -eq "")
+                elseif ($UserInput -eq "")
                 {
                     # do nothing
                     write-host ""
                     continue
                 }
 
-                if ($input -eq "launch-gui")
+                if ($UserInput -eq "launch-gui")
                 {
                     # launch the GUI script
                     Invoke-Expression "$utilityScriptsPath/../cutil-gui.ps1"
@@ -164,12 +196,12 @@ try {
                 }
 
                 # if input is a command in availableScripts, execute the corresponding script with the provided parameters
-                if ($availableScripts -contains $input.Split(" ")[0]) {
-                    Invoke-Expression "$utilityScriptsPath/$input"
+                if ($availableScripts -contains $UserInput.Split(" ")[0]) {
+                    Invoke-Expression "$utilityScriptsPath/$UserInput"
                 }
                 else
                 {
-                    Invoke-Expression $input
+                    Invoke-Expression $UserInput
                     
                 }
 

@@ -1,5 +1,4 @@
 #include "ScanStateWrapper.h"
-#include "ScriptUtil/ScriptCommand.h"
 
 char* RED = "\033[31m";
 char* GREEN = "\033[32m";
@@ -88,7 +87,6 @@ int main()
     bool running = true;
     string input = "";
     ScanStateWrapper* SSW = new ScanStateWrapper();
-    ScriptCommand* SC = new ScriptCommand();
 
     if (SSW->GetGUIMode())
     {

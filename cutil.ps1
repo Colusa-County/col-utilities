@@ -199,6 +199,7 @@ try {
                 if ($UserInput -eq "version")
                 {
                     Write-Host "CUtil version 1.0.0" -ForegroundColor Green
+                    continue
                 }
                 elseif ($UserInput -eq "")
                 {
@@ -214,6 +215,15 @@ try {
                     continue
                 }
 
+                # launch USMT
+                if ($UserInput -eq "usmt")
+                {
+                    # launch the USMT program in a new powershell window
+                    Start-Process powershell -ArgumentList "-NoExit", "-Command", "Invoke-Expression '$utilityScriptsPath/USMT/usmt.exe'"
+                    write-host ""
+                    continue
+                }
+
                 # if input is a command in availableScripts, execute the corresponding script with the provided parameters
                 if ($availableScripts -contains $UserInput.Split(" ")[0]) {
                     Invoke-Expression "$utilityScriptsPath/$UserInput"
@@ -221,7 +231,6 @@ try {
                 else
                 {
                     Invoke-Expression $UserInput
-                    
                 }
 
             }

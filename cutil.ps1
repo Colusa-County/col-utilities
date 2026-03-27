@@ -106,15 +106,15 @@ $availableScripts = Get-AvailableScripts
 try {
     while ($true) {
         # print working directory
-        Write-Host "┌──(" -ForegroundColor Red -NoNewLine
+        Write-Host "┌──{" -ForegroundColor Red -NoNewLine
             Write-Host "$(whoami)" -ForegroundColor Cyan -NoNewline
-                Write-Host ")→ " -ForegroundColor Red -NoNewLine
+                Write-Host "}→ " -ForegroundColor Red -NoNewLine
                     Write-Host "$(Get-Location)" -ForegroundColor Cyan -NoNewLine
                         Write-Host " ~" -ForegroundColor Red
         Write-Host "│" -ForegroundColor Red
-        Write-Host "└─(" -ForegroundColor Red -NoNewline
+        Write-Host "└─{" -ForegroundColor Red -NoNewline
             Write-Host "cUtil" -ForegroundColor Cyan -NoNewline
-                Write-Host ")→ " -ForegroundColor Red -NoNewLine
+                Write-Host "}→ " -ForegroundColor Red -NoNewLine
 
         $UserInput = Read-Host
 

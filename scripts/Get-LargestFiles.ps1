@@ -88,7 +88,7 @@ foreach ($computer in $ComputerNames)
                 Length = $_.Length
             }
             # write progress to console
-            Write-Progress -Activity " " -Status "Processing file: $($currentObject.FullName)" -PercentComplete 0 
+            Write-Progress -Activity "APPDATA " -Status "Processing file: $($currentObject.FullName)" -PercentComplete 0 
 
             # Write-Host "Processing file: $($currentObject.FullName) - Size: $($currentObject.Length) bytes"
 

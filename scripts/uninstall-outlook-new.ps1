@@ -1,0 +1,1 @@
+Get-AppxPackage -AllUsers -Name Microsoft.OutlookForWindows | Remove-AppxPackage -AllUsers

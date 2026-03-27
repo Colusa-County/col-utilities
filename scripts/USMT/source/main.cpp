@@ -260,55 +260,10 @@ int main()
             cout << endl;
         }
 
-        /**
-        *   Uninstall command
-        */
-        else if (input == "uninstall")
+        else
         {
-            cin >> input;
-            if (input == "outlook")
-            {
-                SC->UninstallOutlookNew();
-            }
-            else if (input == "app")
-            {
-                SC->UninstallMSAppScript();
-            }
-        }
-
-        /**
-        *   Install command
-        */
-        else if (input == "install")
-        {
-            cin >> input;
-            if (input == "bginfo")
-            {
-                // bg info install script
-            }
-
-            // other installs?
-        }
-
-        // backup command
-        else if (input == "backup")
-        {
-            SC->SetExecutionPolicy(1);
-            SC->BackupScript();
-            SC->SetExecutionPolicy(0);
-        }
-
-        // current directory list
-        else if (input == "ls" || input == "dir")
-        {
-            SSW->ListCurrentDirectory();
-        }
-
-        // change working directory (not working rn)
-        else if (input == "cd")
-        {
-            cin >> input;
-            SSW->ChangeWorkingDirectory(input);
+            // pass the command to a system call for the shell to handle
+            system(input.c_str());
         }
 
         

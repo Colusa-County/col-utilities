@@ -260,8 +260,16 @@ int main()
 
         else
         {
+            // loop through the input and compile it into one string
+            while (cin.peek() != '\n')
+            {
+                string temp;
+                cin >> temp;
+                input += " " + temp;
+            }
             // pass the command to a system call for the shell to handle
             system(input.c_str());
+            continue;
         }
 
         

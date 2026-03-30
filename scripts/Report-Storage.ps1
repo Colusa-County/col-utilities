@@ -74,5 +74,4 @@ foreach ($stat in $ComputerStats) {
     Write-Host ""
 }
 
-# return computer stats without outputting to console
-return $ComputerStats
+return $ComputerStats | out-null

@@ -227,10 +227,12 @@ try {
                 # if input is a command in availableScripts, execute the corresponding script with the provided parameters
                 if ($availableScripts -contains $UserInput.Split(" ")[0]) {
                     Invoke-Expression "$utilityScriptsPath/$UserInput"
+                    continue
                 }
                 else
                 {
                     Invoke-Expression $UserInput
+                    continue
                 }
 
             }

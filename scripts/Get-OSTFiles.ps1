@@ -32,8 +32,9 @@ if (-not (Test-Connection -ComputerName $ComputerName -Count 1 -ErrorAction Sile
 $users = Get-WmiObject -Class Win32_UserProfile -ComputerName $ComputerName | Select-Object -ExpandProperty LocalPath
 
 Write-Host "Checking OST files for users on $ComputerName..." -ForegroundColor Green
-$files = @()
+Write-Host ""
 
+$files = @()
 foreach ($user in $users) {
     
     $splitUserName = $user.Split('\')[-1]
@@ -50,22 +51,32 @@ foreach ($user in $users) {
             Write-Host "with size: " -NoNewline
             Write-Host "$([Math]::Round($ostFile.Length / 1GB, 2))" -NoNewline -ForegroundColor Red
             Write-Host " GB" -ForegroundColor Cyan
-            Write-Host ""
+            # Write-Host ""
             $files += [PSCustomObject]@{
+                Computer = $ComputerName
                 User = $splitUserName
                 FilePath = $ostFile.FullName
                 SizeMB = [Math]::Round($ostFile.Length / 1MB, 2)
+                TotalSizeGB = 0
             }
         }
     }
 }
+Write-Host ""
 
 # total data size of all OST files found in GB
 $totalSizeGB = [Math]::Round(($files | Measure-Object -Property SizeMB -Sum).Sum / 1024, 2)
 Write-Host "Total size of all OST files found: $totalSizeGB GB" -ForegroundColor Green
+Write-Host ""
+
+# add totalsizeGB to each file object
+foreach ($file in $files) {
+    $file.TotalSizeGB = [Math]::Round($file.SizeMB / 1024, 2)
+}
 
 if ($clear -eq "--clear" -or $clear -eq "-c") {
-    $userInput = Read-Host "Are you sure you want to delete all OST files found? This action cannot be undone. Type 'yes' to confirm."
+    Write-Host "Are you sure you want to delete all OST files found? This action cannot be undone." -ForegroundColor Red
+    $userInput = Read-Host "Type 'yes' to confirm"
     if ($userInput -ne "yes") {
         Write-Host "Aborting OST file deletion." -ForegroundColor Yellow
         exit
@@ -81,3 +92,5 @@ if ($clear -eq "--clear" -or $clear -eq "-c") {
         }
     }
 }
+
+return $files

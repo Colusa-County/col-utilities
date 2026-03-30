@@ -10,8 +10,11 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false)]
-    [string[]] $ComputerName = $env:COMPUTERNAME
+    [string] $ComputerName = $env:COMPUTERNAME
 )
+
+# computer object to store results in
+$ComputerStats = @()
 
 # for each computer, get total disk space free and used on the C: drive
 foreach ($computer in $ComputerName) {
@@ -31,12 +34,15 @@ foreach ($computer in $ComputerName) {
     $usedSpaceGB = [math]::Round($totalSizeGB - $freeSpaceGB, 2)
 
     $diskSpace = @{
-        ComputerName = $computer
+        Computer = $computer
         TotalSizeGB = $totalSizeGB
         UsedSpaceGB = $usedSpaceGB
         FreeSpaceGB = $freeSpaceGB
     }
 
-    Write-Output $diskSpace
     Write-Host ""
+
+    $ComputerStats += $diskSpace
 }
+
+return $ComputerStats

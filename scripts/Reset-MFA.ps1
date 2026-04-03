@@ -10,7 +10,6 @@ param (
     [string]$username
 )
 
-# check for Microsoft.Graph module
 if (-not (Get-Module -ListAvailable -Name Microsoft.Graph)) {
     Write-Error "The Microsoft.Graph module is not installed. Attempting installation.."
     Write-Host "Installing Microsoft.Graph module..." -ForegroundColor Green
@@ -22,13 +21,11 @@ if (-not (Get-Module -ListAvailable -Name Microsoft.Graph)) {
     exit
 }
 
-# check for administrative privileges
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
     Write-Error "You do not have administrative privileges. Please run this script as an administrator and try again."
     exit
 }
 
-# connect to Microsoft Graph
 try {
     Connect-MgGraph -Scopes "User.ReadWrite.All"
 }

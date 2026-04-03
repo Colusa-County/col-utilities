@@ -8,7 +8,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false)]
-    [string] $ComputerName = $env:COMPUTERNAME,
+    [string[]] $ComputerName = $env:COMPUTERNAME,
 
     [Parameter(Mandatory=$false)]
     [string] $clear
@@ -20,54 +20,70 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     exit
 }
 
-Write-Host "Getting OST file information for computer: $ComputerName" -ForegroundColor Green
-
-# check if computer is reachable
-if (-not (Test-Connection -ComputerName $ComputerName -Count 1 -ErrorAction SilentlyContinue)) {
-    Write-Error "The computer '$ComputerName' is not reachable. Please ensure the computer name is correct and try again."
-    exit
-}
-
-# get list of users on the specified computer
-$users = Get-WmiObject -Class Win32_UserProfile -ComputerName $ComputerName | Select-Object -ExpandProperty LocalPath
-
-Write-Host "Checking OST files for users on $ComputerName..." -ForegroundColor Green
-Write-Host ""
-
 $files = @()
-foreach ($user in $users) {
-    
-    $splitUserName = $user.Split('\')[-1]
+foreach ($computer in $ComputerName)
+{
+    Write-Host "Getting OST file information for computer: $computer" -ForegroundColor Green
 
-    $ostPath = "\\$ComputerName\C$\Users\$splitUserName\AppData\Local\Microsoft\Outlook\"
+    # check if computer is reachable
+    if (-not (Test-Connection -ComputerName $computer -Count 1 -ErrorAction SilentlyContinue)) {
+        Write-Error "The computer '$computer' is not reachable. Please ensure the computer name is correct and try again."
+        exit
+    }
 
-    # write-host $ostPath
-    
-    if (Test-Path -Path $ostPath) {
-        $ostFiles = Get-ChildItem -Path $ostPath -Filter *.ost -ErrorAction SilentlyContinue
-        foreach ($ostFile in $ostFiles) {
-            Write-Host "Found OST file: " -NoNewline
-            Write-Host "$($ostFile.FullName.Split('\')[-1]) " -NoNewline -ForegroundColor Yellow
-            Write-Host "with size: " -NoNewline
-            Write-Host "$([Math]::Round($ostFile.Length / 1GB, 2))" -NoNewline -ForegroundColor Red
-            Write-Host " GB" -ForegroundColor Cyan
-            # Write-Host ""
-            $files += [PSCustomObject]@{
-                Computer = $ComputerName
-                User = $splitUserName
-                FilePath = $ostFile.FullName
-                SizeMB = [Math]::Round($ostFile.Length / 1MB, 2)
-                TotalSizeGB = 0
+    # get list of users on the specified computer
+    $users = Get-WmiObject -Class Win32_UserProfile -ComputerName $computer | Select-Object -ExpandProperty LocalPath
+
+    Write-Host "Checking OST files for users on $computer..." -ForegroundColor Green
+    Write-Host ""
+    $ThisPCFiles = @();
+    foreach ($user in $users) {
+        
+        $splitUserName = $user.Split('\')[-1]
+
+        $ostPath = "\\$computer\C$\Users\$splitUserName\AppData\Local\Microsoft\Outlook\"
+
+        # write-host $ostPath
+        
+        if (Test-Path -Path $ostPath) {
+            $ostFiles = Get-ChildItem -Path $ostPath -Filter *.ost -ErrorAction SilentlyContinue
+            foreach ($ostFile in $ostFiles) {
+                Write-Host "Found OST file: " -NoNewline
+                Write-Host "$($ostFile.FullName.Split('\')[-1]) " -NoNewline -ForegroundColor Yellow
+                Write-Host "with size: " -NoNewline
+                Write-Host "$([Math]::Round($ostFile.Length / 1GB, 2))" -NoNewline -ForegroundColor Red
+                Write-Host " GB" -ForegroundColor Cyan
+                # Write-Host ""
+                $files += [PSCustomObject]@{
+                    Computer = $computer
+                    User = $splitUserName
+                    FilePath = $ostFile.FullName
+                    SizeMB = [Math]::Round($ostFile.Length / 1MB, 2)
+                    TotalSizeGB = 0
+                }
+                $ThisPCFiles += [PSCustomObject]@{
+                    Computer = $computer
+                    User = $splitUserName
+                    FilePath = $ostFile.FullName
+                    SizeMB = [Math]::Round($ostFile.Length / 1MB, 2)
+                    TotalSizeGB = 0
+                }
             }
         }
+        
     }
+
+    # total data size of all OST files found in GB (per computer)
+    $totalSizeGB = [Math]::Round(($ThisPCFiles | Measure-Object -Property SizeMB -Sum).Sum / 1024, 2)
+    Write-Host "Total size of all OST files found: $totalSizeGB GB" -ForegroundColor Green
+    Write-Host ""
+    $ThisPCFiles = $null
 }
 Write-Host ""
 
-# total data size of all OST files found in GB
-$totalSizeGB = [Math]::Round(($files | Measure-Object -Property SizeMB -Sum).Sum / 1024, 2)
-Write-Host "Total size of all OST files found: $totalSizeGB GB" -ForegroundColor Green
-Write-Host ""
+# at this point $files should contain ALL files from all computers scanned
+
+
 
 # add totalsizeGB to each file object
 foreach ($file in $files) {
@@ -91,6 +107,8 @@ if ($clear -eq "--clear" -or $clear -eq "-c") {
             Write-Warning "Failed to delete OST file: $($file.FilePath). Error: $_"
         }
     }
+    
+    return
 }
 
 return $files

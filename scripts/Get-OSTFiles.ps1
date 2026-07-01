@@ -8,10 +8,11 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false)]
-    [string[]] $ComputerName = $env:COMPUTERNAME,
+    [string] $clear,
 
     [Parameter(Mandatory=$false)]
-    [string] $clear
+    [string[]] $ComputerName = $env:COMPUTERNAME
+    
 )
 
 # check for administrative privileges

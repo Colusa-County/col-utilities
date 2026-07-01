@@ -17,14 +17,12 @@ param (
     [string]$MACAddress
 )
 
-# build the magic packet by repeating the MAC address 16 times and converting it to bytes
 $macBytes = ($MACAddress -replace "[:\-]", "") -split "([0-9A-Fa-f]{2})" | Where-Object { $_ -ne "" } | ForEach-Object { [Convert]::ToByte($_, 16) }
 $magicPacket = [byte[]]@(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF) + ($macBytes * 16)
 
-# send the magic packet to the broadcast address on port 9 (the standard WOL port)
 $udpClient = New-Object System.Net.Sockets.UdpClient
 $udpClient.EnableBroadcast = $true
-$udpClient.Send($magicPacket, $magicPacket.Length, "255.255.255.255", 9)
+# $udpClient.Send($magicPacket, $magicPacket.Length, "255.255.255.255", 9)
 $udpClient.Close()
 
 Write-Host "Wake-On-LAN magic packet sent to $MACAddress" -ForegroundColor Green

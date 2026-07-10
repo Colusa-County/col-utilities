@@ -1,4 +1,4 @@
-$appName = "*Acrobat*"
+$appName = "Acrobat"
 $paths = @(
     'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
     'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'

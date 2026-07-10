@@ -13,8 +13,44 @@ param (
     [string]$TargetComputer,
 
     [Parameter(Mandatory = $false)]
-    [string]$IncludeHashes
+    [string]$IncludeHashes,
+
+    [Parameter(Mandatory = $false)]
+    [string]$UseVirusTotal
 )
+
+function Import-Env {
+    param(
+        [string]$Path = "$PSScriptRoot\.env"
+    )
+
+    if (!(Test-Path $Path)) {
+        throw ".env file not found at $Path"
+    }
+
+    Get-Content $Path | ForEach-Object {
+        $line = $_.Trim()
+        
+        # Skip empty lines and comments
+        if ([string]::IsNullOrEmpty($line) -or $line.StartsWith("#")) { return }
+
+        # Split on the first '=' only
+        $parts = $line -split '=', 2
+        if ($parts.Count -eq 2) {
+            $key = $parts[0].Trim()
+            $value = $parts[1].Trim()
+
+            # Remove surrounding quotes if present
+            if (($value.StartsWith('"') -and $value.EndsWith('"')) -or 
+                ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+                $value = $value.Substring(1, $value.Length - 2)
+            }
+
+            # Set the environment variable for the current process
+            Set-Item -Path "env:$key" -Value $value
+        }
+    }
+}
 
 Write-Host ""
 Write-Host "Retrieving process list from $TargetComputer..." -ForegroundColor Green
@@ -44,6 +80,21 @@ try {
             }
 
             $processes | Select-Object Name, SHA256Hash, ProcessId, CommandLine | Format-Table -AutoSize
+            if ($UseVirusTotal -eq '--vt') {
+                # send hashes to vt via api call
+                Write-host "Cross referencing hashes against Virust Total database..."
+                Import-Module "$PSScriptRoot\..\Modules\VirusTotalAnalyzer\VirusTotalAnalyzer.psm1" -Force
+                Import-Env
+                $apiKey = $env:VT_API_KEY
+                
+                $hashes = $processes | Select-Object SHA256Hash | Format-Table -AutoSize
+                write-host "Sending hashes to VT ..."
+                foreach ($hash in $hashes) {
+                    $response = Get-VirusReport -ApiKey $apiKey -Hash $hash
+                    write-host $response
+                }
+                write-host "done"
+            }
         }
         else {
             $processes | Select-Object Name, ProcessId, CommandLine | Format-Table -AutoSize

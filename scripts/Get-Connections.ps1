@@ -1,6 +1,9 @@
 ##
 # Get-Connections.ps1
-# Description: This script retrieves information about active network connections on a specified remote Windows 11 computer. It requires administrative privileges on the target computer and the ability to access its network interfaces remotely.
+# Description: This script retrieves information about active network connections on a 
+#              specified remote Windows 11 computer. 
+#              It requires administrative privileges on the target computer 
+#              and the ability to access its network interfaces remotely via WMI objects.
 # Parameters:
 #    -TargetComputer: The name of the remote computer to query
 # Example usage:
@@ -24,8 +27,7 @@ param (
 $manualMode = "--manual"
 
 # Check for administrative privileges
-if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
-{
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
     Write-Warning "This script must be run as an Administrator. Please restart PowerShell as Administrator and try again."
     exit 1
 }
@@ -91,8 +93,7 @@ if ($confirmation -ne "confirm") {
 Clear-Host
 
 # Check if the target computer is online
-if (-not (Test-Connection -ComputerName $TargetComputer -Count 1 -Quiet))
-{
+if (-not (Test-Connection -ComputerName $TargetComputer -Count 1 -Quiet)) {
     Write-Warning "Computer $TargetComputer is not reachable. Please check the computer name and network connection, then try again."
     exit 1
 }
@@ -138,7 +139,8 @@ try {
         
         Manual mode enabled. Press Enter to retreive connections..." -ForegroundColor Cyan
         Read-Host
-    } else {
+    }
+    else {
         Write-Host "
         
         Auto-refresh every $sleepTimer seconds. Press Ctrl+C to stop." -ForegroundColor Yellow
@@ -151,11 +153,11 @@ try {
         Write-Host "======================================================================================================================" -ForegroundColor Cyan
         $processMap = @{}
         Get-WmiObject -Class Win32_Process -ComputerName $TargetComputer -ErrorAction Stop |
-            ForEach-Object { 
-                $processMap[[int]$_.ProcessId] = [PSCustomObject]@{
-                    Name=$_.Name; CmdLine=$_.CommandLine
-                }
+        ForEach-Object { 
+            $processMap[[int]$_.ProcessId] = [PSCustomObject]@{
+                Name = $_.Name; CmdLine = $_.CommandLine
             }
+        }
 
         $tcpConnections = Get-WmiObject -Namespace root\StandardCimv2 -Class MSFT_NetTCPConnection -ComputerName $TargetComputer -ErrorAction Stop
 
@@ -174,7 +176,8 @@ try {
                 try {
                     $dnsCache[$remoteIP] = (Resolve-DnsName $remoteIP -Type PTR -ErrorAction Stop).NameHost
 
-                } catch { $dnsCache[$remoteIP] = $remoteIP }
+                }
+                catch { $dnsCache[$remoteIP] = $remoteIP }
             }
 
             if ($dnsCache.ContainsKey($remoteIP)) { $remoteHost = $dnsCache[$remoteIP] }
@@ -187,23 +190,24 @@ try {
                 if ($c.LocalPort -ge 1024 -and $c.RemotePort -le 1023) { 'Outbound (client -> server)' }
                 elseif ($c.LocalPort -le 1023 -and $c.RemotePort -ge 1024) { 'Inbound (server -> client)' }
                 else { 'Established (unknown direction)' }
-            } else { $stateString }
+            }
+            else { $stateString }
 
             $key = "$($c.LocalAddress):$($c.LocalPort) -> $($c.RemoteAddress):$($c.RemotePort) PID:$($c.OwningProcess)"
 
 
             [PSCustomObject]@{
-                Protocol = 'TCP'
-                Local = "$($c.LocalAddress):$($c.LocalPort)"
-                RemoteIP = $remoteIP
-                RemoteHost = $remoteHost
-                RemotePort = $c.RemotePort
-                State = $stateString
-                Direction = $direction
+                Protocol    = 'TCP'
+                Local       = "$($c.LocalAddress):$($c.LocalPort)"
+                RemoteIP    = $remoteIP
+                RemoteHost  = $remoteHost
+                RemotePort  = $c.RemotePort
+                State       = $stateString
+                Direction   = $direction
                 ProcessName = $process.Name
-                PID = $c.OwningProcess
+                PID         = $c.OwningProcess
                 CommandLine = $process.CmdLine
-                IsNew = -not $previousConnections.ContainsKey($key)
+                IsNew       = -not $previousConnections.ContainsKey($key)
             }
         }
 
@@ -213,17 +217,17 @@ try {
         $udpEnriched = $udpConnections | ForEach-Object {
             $process = $processMap[[int]$_.OwningProcess]
             [PSCustomObject]@{
-                Protocol = 'UDP'
-                Local = "$($_.LocalAddress):$($_.LocalPort)"
-                RemoteIP = '*'
-                RemoteHost = '*'
-                RemotePort = '*'
-                State = 'N/A'
-                Direction = 'UDP Listener'
+                Protocol    = 'UDP'
+                Local       = "$($_.LocalAddress):$($_.LocalPort)"
+                RemoteIP    = '*'
+                RemoteHost  = '*'
+                RemotePort  = '*'
+                State       = 'N/A'
+                Direction   = 'UDP Listener'
                 ProcessName = $process.Name
-                PID = $_.OwningProcess
+                PID         = $_.OwningProcess
                 CommandLine = $process.CmdLine
-                IsNew = $false
+                IsNew       = $false
             }
         }
 
@@ -231,7 +235,7 @@ try {
 
         # display highlights on new connections
         $all | Format-Table -AutoSize -Wrap @{
-            Label = "Connection"; 
+            Label      = "Connection"; 
             Expression = { 
                 if ($_.IsNew) { 
                     ">>> $($_.Local) -> $($_.RemoteHost):$($_.RemotePort): " 
@@ -256,7 +260,8 @@ try {
                 Write-Host "Exiting monitoring loop." -ForegroundColor Green
                 break
             }
-        } else {
+        }
+        else {
             Start-Sleep -Seconds $sleepTimer
         }
     }
@@ -264,7 +269,8 @@ try {
 catch {
     Write-Warning "Error: $($_.Exception.Message)"
 
-} finally {
+}
+finally {
     Write-Host "Monitoring stopped. Exiting." -ForegroundColor Green
 }
 

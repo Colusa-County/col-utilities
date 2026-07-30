@@ -1,3 +1,3 @@
 clear
 write-host "initiating ..."
-pwsh.exe
+pwsh.exe -File "./cutil.ps1"

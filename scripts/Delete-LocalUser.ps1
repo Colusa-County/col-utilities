@@ -29,13 +29,13 @@ foreach ($user in $UserAccounts) {
         # Remove user profile from CIM/WMI
         $profiles = Get-CimInstance Win32_UserProfile | Where-Object { $_.SID -eq $sidString }
         
-        foreach ($profile in $profiles) {
-            Write-Host "[ACTION] Deleting profile path: $($profile.LocalPath)" -ForegroundColor Yellow
-            Remove-CimInstance -InputObject $profile
+        foreach ($_profile in $profiles) {
+            Write-Host "[ACTION] Deleting profile path: $($_profile.LocalPath)" -ForegroundColor Yellow
+            Remove-CimInstance -InputObject $_profile
             
             # Force profile folder deletion if it still exists
-            if (Test-Path $profile.LocalPath) {
-                Remove-Item -Path $profile.LocalPath -Recurse -Force -ErrorAction SilentlyContinue
+            if (Test-Path $_profile.LocalPath) {
+                Remove-Item -Path $_profile.LocalPath -Recurse -Force -ErrorAction SilentlyContinue
                 Write-Host "[INFO] Profile folder deleted" -ForegroundColor Green
             }
         }

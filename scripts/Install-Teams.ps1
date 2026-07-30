@@ -125,3 +125,5 @@ Write-Host '========================================================' -Foregroun
 Write-Host '  Done.' -ForegroundColor Cyan
 Write-Host "  Installer remains on your Desktop: $InstallerPath" -ForegroundColor Cyan
 Write-Host '========================================================' -ForegroundColor Cyan
+
+Remove-Item "$DownloadUrl/teamsbootstrapper.exe"

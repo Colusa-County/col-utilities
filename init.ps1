@@ -1,3 +1,4 @@
+winget install --id Microsoft.PowerShell --source winget -h --accept-package-agreements --accept-source-agreements --disable-interactivity
 clear
 write-host "initiating ..."
-pwsh.exe -File "./cutil.ps1"
+Start-Process pwsh -Verb RunAs -ArgumentList '-File "./cutil.ps1"'

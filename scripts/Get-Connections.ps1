@@ -255,8 +255,8 @@ try {
         if ($manualMode -eq "-m" -or $manualMode -eq "--manual") {
             Write-Host "Manual mode enabled. Press Enter to refresh connections..." -ForegroundColor Cyan
             Write-Host "type 'exit' to stop monitoring." -ForegroundColor Yellow
-            $input = Read-Host
-            if ($input -eq "exit") {
+            $user_input = Read-Host
+            if ($user_input -eq "exit") {
                 Write-Host "Exiting monitoring loop." -ForegroundColor Green
                 break
             }

@@ -25,6 +25,6 @@ param (
 # # $udpClient.Send($magicPacket, $magicPacket.Length, "255.255.255.255", 9)
 # $udpClient.Close()
 
-Write-Host "Wake-On-LAN magic packet sent to $MACAddress" -ForegroundColor Green
+# Write-Host "Wake-On-LAN magic packet sent to $MACAddress" -ForegroundColor Green
 
-
+Write-Host "This script has yet to be developed."

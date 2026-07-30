@@ -18,9 +18,9 @@ $ErrorActionPreference = 'Stop'
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-$DownloadUrl   = 'https://go.microsoft.com/fwlink/?linkid=2243204&clcid=0x409'
+$DownloadUrl = 'https://statics.teams.cdn.office.net/production-teamsprovision/lkg/teamsbootstrapper.exe'
 $InstallerName = 'teamsbootstrapper.exe'
-$DesktopPath   = [Environment]::GetFolderPath('Desktop')
+$DesktopPath = [Environment]::GetFolderPath('Desktop')
 $InstallerPath = Join-Path -Path $DesktopPath -ChildPath $InstallerName
 
 Write-Host '========================================================' -ForegroundColor Cyan
@@ -71,7 +71,7 @@ Write-Host '      This may take a moment depending on your connection...'
 try {
     # Prefer Invoke-WebRequest; follows the fwlink redirect to the real CDN asset
     $ProgressPreference = 'SilentlyContinue'  # cleaner console during large downloads
-    Invoke-WebRequest -Uri $DownloadUrl -OutFile $InstallerPath -UseBasicParsing
+    curl.exe -O $DownloadUrl $InstallerPath
     $ProgressPreference = 'Continue'
 }
 catch {
@@ -85,7 +85,7 @@ if (-not (Test-Path -LiteralPath $InstallerPath)) {
 }
 
 $fileInfo = Get-Item -LiteralPath $InstallerPath
-$sizeMB   = [math]::Round($fileInfo.Length / 1MB, 2)
+$sizeMB = [math]::Round($fileInfo.Length / 1MB, 2)
 Write-Host "      Download complete. Size: $sizeMB MB" -ForegroundColor Green
 Write-Host "      Saved to: $InstallerPath" -ForegroundColor Green
 Write-Host ''
@@ -100,11 +100,11 @@ Write-Host ''
 
 try {
     $process = Start-Process -FilePath $InstallerPath `
-                             -ArgumentList '-p' `
-                             -WorkingDirectory $DesktopPath `
-                             -Wait `
-                             -PassThru `
-                             -NoNewWindow
+        -ArgumentList '-p' `
+        -WorkingDirectory $DesktopPath `
+        -Wait `
+        -PassThru `
+        -NoNewWindow
 
     $exitCode = $process.ExitCode
     Write-Host ''

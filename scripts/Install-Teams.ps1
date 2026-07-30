@@ -20,7 +20,7 @@ $ErrorActionPreference = 'Stop'
 # ---------------------------------------------------------------------------
 $DownloadUrl = 'https://statics.teams.cdn.office.net/production-teamsprovision/lkg/teamsbootstrapper.exe'
 $InstallerName = 'teamsbootstrapper.exe'
-$DesktopPath = [Environment]::GetFolderPath('Desktop')
+$DesktopPath = './'
 $InstallerPath = Join-Path -Path $DesktopPath -ChildPath $InstallerName
 
 Write-Host '========================================================' -ForegroundColor Cyan
@@ -123,7 +123,7 @@ catch {
 Write-Host ''
 Write-Host '========================================================' -ForegroundColor Cyan
 Write-Host '  Done.' -ForegroundColor Cyan
-Write-Host "  Installer remains on your Desktop: $InstallerPath" -ForegroundColor Cyan
+Write-Host "  Installer is being removed from your local dir: $InstallerPath" -ForegroundColor Cyan
 Write-Host '========================================================' -ForegroundColor Cyan
 
-Remove-Item "$DownloadUrl/teamsbootstrapper.exe"
+Remove-Item "./teamsbootstrapper.exe"

@@ -1,5 +1,5 @@
 ##
-# NOTE: THIS CURRENTLY DOES NOT WORK
+# NOTE: THIS CURRENTLY DOES NOT WORK - NEEDS DEVELOPMENT
 #
 # Wake-On-LAN.ps1
 # Description: This script sends a Wake-On-LAN (WOL) magic packet to a specified MAC address to wake up a computer on the network. 
@@ -17,13 +17,13 @@ param (
     [string]$MACAddress
 )
 
-$macBytes = ($MACAddress -replace "[:\-]", "") -split "([0-9A-Fa-f]{2})" | Where-Object { $_ -ne "" } | ForEach-Object { [Convert]::ToByte($_, 16) }
-$magicPacket = [byte[]]@(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF) + ($macBytes * 16)
+# $macBytes = ($MACAddress -replace "[:\-]", "") -split "([0-9A-Fa-f]{2})" | Where-Object { $_ -ne "" } | ForEach-Object { [Convert]::ToByte($_, 16) }
+# $magicPacket = [byte[]]@(0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF) + ($macBytes * 16)
 
-$udpClient = New-Object System.Net.Sockets.UdpClient
-$udpClient.EnableBroadcast = $true
-# $udpClient.Send($magicPacket, $magicPacket.Length, "255.255.255.255", 9)
-$udpClient.Close()
+# $udpClient = New-Object System.Net.Sockets.UdpClient
+# $udpClient.EnableBroadcast = $true
+# # $udpClient.Send($magicPacket, $magicPacket.Length, "255.255.255.255", 9)
+# $udpClient.Close()
 
 Write-Host "Wake-On-LAN magic packet sent to $MACAddress" -ForegroundColor Green
 

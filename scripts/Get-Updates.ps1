@@ -1,4 +1,4 @@
-Clear-Screen
+Clear-Host
 
 write-host "initiating update check ..."
 

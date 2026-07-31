@@ -1,1 +1,1 @@
-.\Get-Updates.ps1
+.\scripts\Get-Updates.ps1

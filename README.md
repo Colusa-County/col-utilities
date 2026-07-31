@@ -2,39 +2,23 @@
 
 A series of scripts and programs to provide different utilities to the IT team
 
-
-
-\# setup
-
+## setup
 To set up cutil properly, at the moment, a series of steps must be completed.
 
+### Install git 
+ - winget install Microsoft.git
 
+### Clone this repository:
+ - git clone http://git-server:3000/colusa-county/utilities.git
 
-&#x20;- Install git: 
+### Make sure the execution policy will allow PS1 scripts to execute:
+ - Set-ExecutionPolicy RemoteSigned
 
-&#x09;winget install Microsoft.git
+### Step into the cloned repo:
+ - cd ./utilities
 
- - Clone this repository:
-
-&#x09;git clone http://git-server:3000/colusa-county/utilities.git
-
-
-
-&#x20;- Make sure the execution policy will allow PS1 scripts to execute:
-
-&#x09;Set-ExecutionPolicy RemoteSigned
-
-
-
-&#x20;- Step into the cloned repo:
-
-&#x09;cd ./utilities
-
-
-
-&#x20;- Initialize the application:
-
-&#x09;./init.ps1
+### Initialize the application:
+ - ./init.ps1
 
 
 
